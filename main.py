@@ -3,18 +3,18 @@ from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 import requests
 import io
+import os
+from dotenv import load_dotenv
+
+# Load biến môi trường từ file .env
+load_dotenv()
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 app = FastAPI()
 
-#API key
-ELEVENLABS_API_KEY = "sk_725a7a498d48d8e3da9fd616b122a81d0e49b8281fc29b80"
-
-
-# Model cho request
 class TextRequest(BaseModel):
     text: str
     voice_id: str = "nPczCjzI2devNBz1zQrb"
-
 
 @app.post("/tts/")
 async def text_to_speech(req: TextRequest):
@@ -48,4 +48,3 @@ def get_voices():
     }
     response = requests.get("https://api.elevenlabs.io/v1/voices", headers=headers)
     return response.json()
-
