@@ -14,7 +14,7 @@ app = FastAPI()
 
 class TextRequest(BaseModel):
     text: str
-    voice_id: str = "nPczCjzI2devNBz1zQrb"
+    voice_id: str = "IKne3meq5aSn9XLyUdCD"
 
 @app.post("/tts/")
 async def text_to_speech(req: TextRequest):
