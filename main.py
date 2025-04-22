@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
+from gtts import gTTS
 import requests
 import io
 import os
@@ -48,3 +49,43 @@ def get_voices():
     }
     response = requests.get("https://api.elevenlabs.io/v1/voices", headers=headers)
     return response.json()
+
+@app.post("/format-code")
+def format_code(req: TextRequest):
+    def split_text_into_paragraphs(text: str, max_length: int = 500) -> list:
+        # Initialize variables
+        paragraphs = []
+        current_paragraph = ""
+        
+        # Split text into sentences (assuming periods mark the end of sentences)
+        sentences = text.split('.')
+        
+        for sentence in sentences:
+            # Skip empty sentences
+            if not sentence.strip():
+                continue
+                
+            # Add period back to the sentence
+            sentence = sentence.strip() + '.'
+            
+            # If adding this sentence would exceed max_length,
+            # store current paragraph and start a new one
+            if len(current_paragraph + sentence) > max_length:
+                if current_paragraph:
+                    paragraphs.append(current_paragraph.strip())
+                current_paragraph = sentence
+            else:
+                # Add sentence to current paragraph
+                current_paragraph = (current_paragraph + ' ' + sentence).strip()
+        
+        # Add the last paragraph if it's not empty
+        if current_paragraph:
+            paragraphs.append(current_paragraph.strip())
+            
+        return paragraphs
+
+    # Process the input text
+    formatted_paragraphs = split_text_into_paragraphs(req.text)
+    
+    # Return the formatted result
+    return {"formatted_text": formatted_paragraphs}
